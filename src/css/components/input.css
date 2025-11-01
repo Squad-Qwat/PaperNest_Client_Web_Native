@@ -1,0 +1,151 @@
+@import url('../base/radius.css');
+@import url('../base/colors.css');
+@import url('../base/typography.css');
+@import url('../base/spacing.css');
+
+.input {
+    position: relative;
+    display: block;
+    width: 100%;
+    appearance: none;
+    border: 1px solid var(--input);
+    border-radius: var(--radius-lg);
+    padding: calc(var(--spacing-2-5) - 1px) calc(var(--spacing-3-5) - 1px);
+    font-size: 1rem;
+    line-height: 1.5rem;
+    color: var(--fg);
+    background-color: transparent;
+}
+
+.input::placeholder {
+    color: var(--muted-fg);
+}
+
+.input:enabled:hover {
+    border-color: color-mix(in srgb, var(--muted-fg) 30%, transparent);
+}
+
+.input:focus {
+    border-color: color-mix(in srgb, var(--ring) 70%, transparent);
+    background-color: var(--input-focus-bg);
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 20%, transparent);
+}
+
+.input:invalid {
+    border-color: color-mix(in srgb, var(--danger-subtle-fg) 70%, transparent);
+    background-color: color-mix(in srgb, var(--danger-subtle) 5%, transparent);
+}
+
+.input:focus:invalid {
+    border-color: color-mix(in srgb, var(--danger-subtle-fg) 70%, transparent);
+    background-color: color-mix(in srgb, var(--danger-subtle) 5%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger-subtle-fg) 20%, transparent);
+}
+
+.input:invalid:enabled:hover {
+    border-color: color-mix(in srgb, var(--danger-subtle-fg) 80%, transparent);
+}
+
+.input:disabled {
+    background-color: var(--muted);
+    opacity: 0.5;
+    color: var(--muted);
+}
+
+@media (min-width: 640px) {
+    .input {
+        font-size: var(--text-sm);
+        line-height: 1.5rem;
+        padding: calc(var(--spacing-1-5) - 1px) calc(var(--spacing-3) - 1px);
+    }
+}
+
+/* INPUT GROUP */
+.input-group {
+    position: relative;
+    display: block;
+    isolation: isolate;
+}
+
+.input-group .input-icon,
+.input-group .input-loader,
+.input-group .input-text,
+.input-group .input-keyboard {
+    position: absolute;
+    top: 0.75rem;
+    z-index: 10;
+    height: 1.25rem;
+    width: 1.25rem;
+    color: var(--muted-fg);
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@media (min-width: 640px) {
+    .input-group .input-icon,
+    .input-group .input-loader,
+    .input-group .input-text,
+    .input-group .input-keyboard {
+        top: 0.625rem;
+        height: 1rem;
+        width: 1rem;
+    }
+}
+
+.input-group .input-icon:first-child,
+.input-group .input-loader:first-child,
+.input-group .input-text:first-child,
+.input-group .input-keyboard:first-child {
+    left: 0.75rem;
+}
+
+.input-group .input-icon:last-child,
+.input-group .input-loader:last-child,
+.input-group .input-text:last-child,
+.input-group .input-keyboard:last-child {
+    right: 0.75rem;
+}
+
+@media (min-width: 640px) {
+    .input-group .input-icon:first-child,
+    .input-group .input-loader:first-child,
+    .input-group .input-text:first-child,
+    .input-group .input-keyboard:first-child {
+        left: 0.625rem;
+    }
+
+    .input-group .input-icon:last-child,
+    .input-group .input-loader:last-child,
+    .input-group .input-text:last-child,
+    .input-group .input-keyboard:last-child {
+        right: 0.625rem;
+    }
+}
+
+.input-group > .input-button {
+    position: absolute;
+    top: 0;
+    z-index: 10;
+    min-height: 2.75rem;
+}
+
+.input-group > .input-button:first-child {
+    left: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.input-group > .input-button:last-child {
+    right: 0;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+@media (min-width: 640px) {
+    .input-group > .input-button {
+        min-height: 2.25rem;
+    }
+}

@@ -5,6 +5,12 @@
 
 @import url('./base/colors.css');
 @import url('./base/typography.css');
+@import url('./base/radius.css');
+@import url('./base/spacing.css');
+@import url('./base/shadow.css');
 
 @import url('./components/button.css');
 @import url('./components/badge.css');
+@import url('./components/card.css');
+@import url('./components/input.css');
+@import url('./components/search-input.css');
