@@ -95,12 +95,11 @@ document.addEventListener('DOMContentLoaded', function () {
         const emailForm = document.getElementById('email-form');
         emailForm.addEventListener('submit', function (e) {
             e.preventDefault();
-            // const emailValue = document.getElementById('email').value.trim();
-            // if (!emailValue) {
-            //     alert('Please enter your email.');
-            //     return;
-            // }
-            // signUpData.email = emailValue;
+            const emailValue = document.getElementById('email').value.trim();
+            
+            // Simpan email ke signUpData
+            signUpData.email = emailValue;
+            
             currentStep = 1;
             renderStep();
         });
@@ -167,18 +166,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
         document.getElementById('password-form').addEventListener('submit', function (e) {
             e.preventDefault();
-            // const pwd = document.getElementById('password').value;
-            // const confirm = document.getElementById('confirmPassword').value;
-            // if (pwd.length < 8) {
-            //     alert('Password must be at least 8 characters.');
-            //     return;
-            // }
-            // if (pwd !== confirm) {
-            //     alert('Password and confirmation do not match.');
-            //     return;
-            // }
-            // signUpData.password = pwd;
-            // signUpData.confirmPassword = confirm;
+            const pwd = document.getElementById('password').value;
+            const confirm = document.getElementById('confirmPassword').value;
+            
+            // Simpan password ke signUpData
+            signUpData.password = pwd;
+            signUpData.confirmPassword = confirm;
+            
             currentStep = 2;
             renderStep();
         });
@@ -258,20 +252,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
         document.getElementById('credentials-form').addEventListener('submit', function (e) {
             e.preventDefault();
-            // const firstName = document.getElementById('firstName').value.trim();
-            // const lastName = document.getElementById('lastName').value.trim();
-            // const usernameValue = document.getElementById('username').value.trim();
-            // const roleValue = document.getElementById('role').value;
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const usernameValue = document.getElementById('username').value.trim();
+            const roleValue = document.getElementById('role').value;
 
-            // if (!firstName || !lastName || !usernameValue) {
-            //     alert('Please fill out first name, last name, and username.');
-            //     return;
-            // }
-
-            // signUpData.firstName = firstName;
-            // signUpData.lastName = lastName;
-            // signUpData.username = usernameValue;
-            // signUpData.role = roleValue;
+            // Simpan credentials ke signUpData
+            signUpData.firstName = firstName;
+            signUpData.lastName = lastName;
+            signUpData.username = usernameValue;
+            signUpData.role = roleValue;
 
             currentStep = 3;
             renderStep();
@@ -363,8 +353,45 @@ document.addEventListener('DOMContentLoaded', function () {
                 .getElementById('workspaceDescription')
                 .value.trim();
 
+            // Simpan ke globalUsersData
+            const usersData = GLOBAL_OBJECT.globalUsersData;
+            const newId = usersData.length > 0 
+                ? Math.max(...usersData.map(u => u.id)) + 1 
+                : 1;
+
+            const newUser = {
+                id: newId,
+                email: signUpData.email || 'user@example.com',
+                password: signUpData.password || 'defaultpassword',
+                firstName: signUpData.firstName || 'New',
+                lastName: signUpData.lastName || 'User',
+                username: signUpData.username || `user${newId}`,
+                role: signUpData.role || 'Student',
+                workspace: {
+                    icon: signUpData.workspaceIcon,
+                    name: signUpData.workspaceName || 'My Workspace',
+                    description: signUpData.workspaceDescription || 'Personal workspace'
+                },
+                createdAt: new Date().toISOString().split('T')[0],
+                lastLogin: 'baru saja',
+                documents: []
+            };
+
+            usersData.push(newUser);
+            
+            // Set sebagai current user
+            GLOBAL_OBJECT.setCurrentUser(newId);
+
             console.log('Final signUpData:', signUpData);
-            alert('Pendaftaran selesai! Data telah disimpan (lihat console untuk detail)');
+            console.log('New User Added:', newUser);
+            console.log('All Users:', usersData);
+            
+            alert('Pendaftaran selesai! Data telah disimpan.\n\nUser ID: ' + newUser.id + '\nUsername: ' + newUser.username);
+            
+            // Redirect ke dashboard setelah 1 detik
+            setTimeout(() => {
+                window.location.href = './dashboard/index.html';
+            }, 1000);
         });
     }
 

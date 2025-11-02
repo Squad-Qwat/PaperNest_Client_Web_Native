@@ -1,49 +1,8 @@
-const projectsData = [
-    {
-        id: 1,
-        title: 'Analisis Sistem Informasi Manajemen Berbasis Cloud Computing',
-        description: 'Studi implementasi cloud computing dalam sistem informasi manajemen perusahaan.',
-        status: 'personal',
-        lastUpdated: '2 jam yang lalu'
-    },
-    {
-        id: 2,
-        title: 'Pengaruh Artificial Intelligence terhadap Produktivitas Kerja',
-        description: 'Analisis dampak AI dalam meningkatkan efisiensi kerja di era digital.',
-        status: 'shared',
-        lastUpdated: '5 jam yang lalu'
-    },
-    {
-        id: 3,
-        title: 'Perancangan Aplikasi Mobile untuk Manajemen Dokumen Digital',
-        description: 'Pengembangan sistem manajemen dokumen mobile dengan fitur kolaborasi real-time.',
-        status: 'personal',
-        lastUpdated: '1 hari yang lalu'
-    },
-    {
-        id: 4,
-        title: 'Implementasi Blockchain dalam Sistem Keamanan Data',
-        description: 'Kajian teknologi blockchain untuk keamanan data pada sistem informasi kesehatan.',
-        status: 'shared',
-        lastUpdated: '3 jam yang lalu'
-    },
-    {
-        id: 5,
-        title: 'Evaluasi User Experience pada Platform E-Learning',
-        description: 'Analisis faktor-faktor yang mempengaruhi efektivitas pembelajaran online.',
-        status: 'personal',
-        lastUpdated: '2 hari yang lalu'
-    },
-    {
-        id: 6,
-        title: 'Sistem Rekomendasi Berbasis Machine Learning untuk E-Commerce',
-        description: 'Pengembangan algoritma rekomendasi produk berdasarkan perilaku pengguna.',
-        status: 'shared',
-        lastUpdated: '6 jam yang lalu'
-    }
-];
+let projectsData = GLOBAL_OBJECT.getCurrentUserDocuments();
 
 function renderProjectCards() {
+    projectsData = GLOBAL_OBJECT.getCurrentUserDocuments();
+    
     const projectsGrid = document.getElementById('projectsGrid');
     if (!projectsGrid) return;
 
@@ -66,15 +25,27 @@ function renderProjectCards() {
                         <i class='bx bx-time'></i>
                         <span>${project.lastUpdated}</span>
                     </div>
-                    <button class="project-card-delete-btn" data-project-id="${project.id}" aria-label="Delete project">
-                        <i class='bx bx-trash'></i>
-                    </button>
+                    <div class="project-card-actions">
+                        <button class="project-card-open-btn" data-project-id="${project.id}" aria-label="Open project">
+                            <span>Buka</span>
+                        </button>
+                        <button class="project-card-delete-btn" data-project-id="${project.id}" aria-label="Delete project">
+                            <i class='bx bx-trash'></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         `;
     });
 
     projectsGrid.innerHTML = cardsHTML;
+
+    document.querySelectorAll('.project-card-open-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            const projectId = this.getAttribute('data-project-id');
+            handleProjectOpen(projectId);
+        });
+    });
 
     document.querySelectorAll('.project-card-delete-btn').forEach(btn => {
         btn.addEventListener('click', function(e) {
@@ -84,16 +55,28 @@ function renderProjectCards() {
     });
 }
 
+function handleProjectOpen(projectId) {
+    const project = projectsData.find(p => p.id == projectId);
+    if (project) {
+        // push ke halaman citation dengan docId sebagai parameter
+        window.location.href = `../citation/index.html?docId=${projectId}`;
+    }
+}
+
 function handleProjectDelete(projectId) {
     const project = projectsData.find(p => p.id == projectId);
     if (project) {
         const confirmed = confirm(`Apakah Anda yakin ingin menghapus "${project.title}"?\n\nTindakan ini tidak dapat dibatalkan.`);
         if (confirmed) {
-            const index = projectsData.findIndex(p => p.id == projectId);
-            if (index > -1) {
-                projectsData.splice(index, 1);
-                renderProjectCards();
-                initializeSearch();
+            // Hapus dari current user documents
+            const currentUser = GLOBAL_OBJECT.getCurrentUser();
+            if (currentUser && currentUser.documents) {
+                const index = currentUser.documents.findIndex(p => p.id == projectId);
+                if (index > -1) {
+                    currentUser.documents.splice(index, 1);
+                    renderProjectCards();
+                    initializeSearch();
+                }
             }
         }
     }
@@ -150,11 +133,15 @@ function handleNewProject() {
         title: title.trim(),
         description: description.trim(),
         status: status.toLowerCase(),
-        lastUpdated: 'baru saja'
+        lastUpdated: 'baru saja',
+        citation: [] // Dokumen baru mulai dengan citation kosong
     };
 
-    // Untuk menambahkan proyek baru di awal array
-    projectsData.unshift(newProject);
+    // Tambahkan ke documents current user
+    const currentUser = GLOBAL_OBJECT.getCurrentUser();
+    if (currentUser && currentUser.documents) {
+        currentUser.documents.unshift(newProject);
+    }
 
     renderProjectCards();
     initializeSearch();    

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Citations - PaperNest</title>
+    <link rel="stylesheet" href="../src/css/pages/citation.css" />
+</head>
+
+<body>
+    <main>
+        <div class="citation-container">
+            <div class="citation-header">
+                <div>
+                    <h1 class="citation-title">Citations</h1>
+                    <p class="citation-description">Kelola semua sitasi dokumen Anda</p>
+                </div>
+                <button class="btn-new-citation">
+                    <i class='bx bx-plus'></i>
+                    <span>Tambah Sitasi</span>
+                </button>
+            </div>
+            <div class="citation-search-section">
+                <div class="search-bar-wrapper">
+                    <i class='bx bx-search search-icon'></i>
+                    <input type="text" class="citation-search-input"
+                        placeholder="Cari sitasi..." id="citationSearch" />
+                </div>
+            </div>
+            <div class="citations-section">
+                <h2 class="section-title">Semua Sitasi</h2>
+                <div class="citations-list" id="citationsList">
+                </div>
+            </div>
+        </div>
+    </main>
+    <script src="../src/js/global-object.js"></script>
+    <script src="../src/js/components/navbar.js"></script>
+    <script src="../src/js/pages/citation.js"></script>
+    <script>
+        createNavbar({
+            activePage: 'Citations',
+            insertPosition: 'afterbegin',
+            isMenuInDocumentPage: true
+        });
+    </script>
+</body>
+
+</html>

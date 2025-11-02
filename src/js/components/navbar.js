@@ -8,16 +8,24 @@ const navbarConfig = {
         { name: "Chatbot", href: "/chatbot" },
         { name: "Review", href: "/review" },
         { name: "Settings", href: "/settings" }
+    ],
+    menuItemsInDocumentPage: [
+        { name: "Citations", href: "/project/citations" },
     ]
 };
 
 function createNavbar(options = {}) {
     const {
         activePage = "Projects",
-        insertPosition = "afterbegin"
+        insertPosition = "afterbegin",
+        isMenuInDocumentPage = false
     } = options;
 
-    const updatedMenuItems = navbarConfig.menuItems.map(item => ({
+
+    const updatedMenuItems = isMenuInDocumentPage ? navbarConfig.menuItemsInDocumentPage.map(item => ({
+        ...item,
+        active: item.name === activePage
+    })) : navbarConfig.menuItems.map(item => ({
         ...item,
         active: item.name === activePage
     }));
