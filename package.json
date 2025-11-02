@@ -13,10 +13,8 @@
   "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.15.1",
-  "dependencies": {
-    "browser-sync": "^3.0.4"
-  },
   "devDependencies": {
+    "browser-sync": "^3.0.4",
     "husky": "^9.1.7",
     "prettier": "^3.6.2"
   }
