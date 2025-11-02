@@ -6,7 +6,7 @@ const docsData = GLOBAL_OBJECT.getCurrentUserDocuments();
 let selectedDoc = null;
 
 docsData.forEach(doc => {
-    // Jika ada docId di URL cuma ambil citations dari dokumen itu
+    // kalo ada docId di URL cuma ambil citations dari dokumen itu
     if (selectedDocId && doc.id != selectedDocId) {
         return;
     }

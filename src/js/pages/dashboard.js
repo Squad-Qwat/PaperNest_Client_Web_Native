@@ -155,7 +155,26 @@ function initializeNewProjectButton() {
     }
 }
 
+function updateDashboardHeader() {
+    const currentUser = GLOBAL_OBJECT.getCurrentUser();
+    if (currentUser && currentUser.workspace) {
+        const titleElement = document.querySelector('.dashboard-title');
+        const descElement = document.querySelector('.dashboard-description');
+        
+        if (titleElement && currentUser.workspace.name) {
+            titleElement.textContent = currentUser.workspace.name;
+        }
+        
+        if (descElement) {
+            const workspaceIcon = currentUser.workspace.icon || '📁';
+            const workspaceDesc = currentUser.workspace.description || 'Workspace Anda';
+            descElement.innerHTML = `<span class="workspace-icon">${workspaceIcon}</span> ${workspaceDesc}`;
+        }
+    }
+}
+
 function initializeDashboard() {
+    updateDashboardHeader();
     renderProjectCards();
     initializeSearch();
     initializeNewProjectButton();

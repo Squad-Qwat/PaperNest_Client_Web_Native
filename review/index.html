@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review - PaperNest</title>
+    <link rel="stylesheet" href="../src/css/pages/review.css" />
+</head>
+
+<body>
+    <main>
+        <div class="review-container">
+            <div class="review-header">
+                <div>
+                    <h1 class="review-title">Review</h1>
+                    <p class="review-description">Kelola dan tinjau semua dokumen Anda</p>
+                </div>
+                <button class="btn-new-review">
+                    <i class='bx bx-plus'></i>
+                    <span>Tambah Review</span>
+                </button>
+            </div>
+            <div class="review-search-section">
+                <div class="search-bar-wrapper">
+                    <i class='bx bx-search search-icon'></i>
+                    <input type="text" class="review-search-input"
+                        placeholder="Cari review..." id="reviewSearch" />
+                </div>
+            </div>
+            <div class="reviews-section">
+                <h2 class="section-title">Semua Review</h2>
+                <div class="reviews-list" id="reviewsList">
+                </div>
+            </div>
+        </div>
+    </main>
+    <script src="../src/js/global-object.js"></script>
+    <script src="../src/js/components/navbar.js"></script>
+    <script src="../src/js/pages/review.js"></script>
+    <script>
+        createNavbar({
+            activePage: 'Reviews',
+            insertPosition: 'afterbegin',
+            isMenuInDocumentPage: true
+        });
+    </script>
+</body>
+
+</html>
