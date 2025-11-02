@@ -1,4 +1,5 @@
 @import url('https://cdn.boxicons.com/3.0.3/fonts/basic/boxicons.min.css');
+@import url('https://cdn.boxicons.com/3.0.3/fonts/brands/boxicons-brands.min.css');
 @import url('https://fonts.googleapis.com/css2?family=Google+Sans+Code:ital,wght@0,300..800;1,300..800&family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&family=Lora:ital,wght@0,400..700;1,400..700&display=swap');
 
 @import url('./reset.css');
@@ -14,3 +15,5 @@
 @import url('./components/card.css');
 @import url('./components/input.css');
 @import url('./components/search-input.css');
+@import url('./components/navbar.css');
+@import url('./components/select.css');

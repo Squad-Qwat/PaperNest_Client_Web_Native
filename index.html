@@ -3,15 +3,69 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>PaperNest - Built Your Document With AI</title>
+        <title>Sign in / PaperNest</title>
 
         <link rel="stylesheet" href="./src/css/styles.css" />
+        <link rel="stylesheet" href="./src/css/pages/auth.css" />
     </head>
-    <body style="margin: 20rem">
+    <body>
+        <main class="container">
+            <div class="auth-wrapper">
+                <div class="auth-title-wrapper">
+                    <h1>Log in to your account</h1>
+                </div>
 
-        <input type="text" class="input" placeholder="Masukan Email Anda">
+                <div class="social-button">
+                    <button class="btn btn-secondary btn-md">
+                        <i class="bxl bx-google"></i>
+                        <span>Login using Google</span>
+                    </button>
+                    <button class="btn btn-secondary btn-md">
+                        <i class="bxl bx-github"></i>
+                        <span>Login using Google</span>
+                    </button>
+                </div>
 
-        
+                <div class="divider">
+                    <span>or continue with your credentials</span>
+                </div>
+
+                <form id="login-form" class="auth-form">
+                    <div class="field">
+                        <label for="email">Email</label>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            autocomplete="false"
+                            placeholder="Enter your Email"
+                            class="input" />
+                    </div>
+
+                    <div class="field">
+                        <label for="password">Password</label>
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            autocomplete="false"
+                            placeholder="Password"
+                            class="input" />
+                    </div>
+
+                    <a href="">Forgot your password?</a>
+
+                    <button type="submit" class="btn btn-md btn-primary">Log In</button>
+                </form>
+
+                <div class="auth-footer">
+                    <p>Dont'have an account?</p>
+
+                    <a href="./sign-up.html">Join PaperNest</a>
+                </div>
+            </div>
+        </main>
+
         <script type="module" src="./src/js/index.js" defer></script>
     </body>
 </html>

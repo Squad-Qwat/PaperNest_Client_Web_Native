@@ -1,6 +1,3 @@
-@import url('../base/shadow.css');
-@import url('../base/typography.css');
-
 :root {
     --card: oklch(0.12 0.006 285.885);
     --card-fg: oklch(0.985 0 0);

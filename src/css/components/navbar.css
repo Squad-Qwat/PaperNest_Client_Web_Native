@@ -1,0 +1,119 @@
+:root {
+    --navbar-gutter: var(--spacing-2-5);
+    --bg-navbar: var(--bg);
+}
+
+.navbar {
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+}
+
+.navbar .default {
+    border-bottom: 1px solid var(--border);
+    background-color: var(--bg-navbar);
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+.navbar.float {
+    margin: 0 auto;
+    width: 100%;
+    max-width: var(--breakpoint-xl);
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+.navbar.inset {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    background-color: var(--bg-navbar);
+    padding-bottom: 0.5rem;
+}
+
+.navbar.sticky.top {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+}
+
+.navbar.sticky.bottom {
+    position: sticky;
+    bottom: 0;
+    z-index: 40;
+}
+
+.navbar .navbar-content {
+    margin: 0 auto;
+    width: 100%;
+    max-width: var(--breakpoint-xl);
+    display: flex;
+    align-items: center;
+}
+
+.navbar-trigger {
+    margin-left: -0.5rem;
+    display: none;
+}
+
+@media (max-width: 448px) {
+    .navbar-trigger {
+        display: inline-flex;
+    }
+}
+
+.navbar-item {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem;
+    font-weight: 500;
+    font-size: 1rem;
+    color: var(--muted-fg);
+    cursor: pointer;
+    text-decoration: none;
+    border-radius: 0.5rem;
+}
+
+.navbar-item:hover {
+    background-color: var(--muted-fg) / 10;
+    color: var(--fg);
+}
+
+.navbar-item.current {
+    color: var(--fg);
+}
+
+.navbar-item .icon {
+    flex-shrink: 0;
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--muted-fg);
+}
+
+.navbar-item.current .icon {
+    color: var(--fg);
+}
+
+.navbar-item .current-indicator {
+    position: absolute;
+    left: -1rem;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+    background-color: var(--fg);
+    top: calc(var(--navbar-gutter) - var(--spacing-0-5));
+}
+
+@media (min-width: var(--breakpoint-md)) {
+    .navbar-item {
+        gap: var(--navbar-gutter);
+        padding-left: var(--navbar-gutter);
+        padding-right: var(--navbar-gutter);
+        font-size: 0.875rem;
+    }
+}
