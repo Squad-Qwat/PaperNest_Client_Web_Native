@@ -142,7 +142,7 @@ function injectModalHTML()
             
             <div class="dialog-actions">
                 <button type="button" id="add-citation-cancel-btn" class="btn-secondary">Batal</button>
-                <button type="submit" class="btn-primary">Kumpulkan</button>
+                <button type="submit" id="add-citation-submit-btn" class="btn-primary">Kumpulkan</button>
             </div>
         </form>
     </dialog>
@@ -558,13 +558,68 @@ function handleModalFormSubmit(event)
 }
   
 /**
- * Memperbarui field formulir yang terlihat berdasarkan dropdown.
+ * Memperbarui field formulir yang terlihat berdasarkan dropdown DAN mengelola tampilan dua langkah (umum vs spesifik).
  * @param {string} selectedType - Nilai dari dropdown (Buku, Jurnal, dll.)
+ * @param {boolean} isInitialState - Apakah kita dalam tahap memilih jenis sitasi?
  */
-function updateFormVisibility(selectedType) 
+function updateFormVisibility(selectedType, isInitialState = true) 
 {
     const formGroups = document.querySelectorAll('#add-citation-form .form-group[data-form-type]');
+    const cancelBtn = document.getElementById('add-citation-cancel-btn');
+    const submitBtn = document.getElementById('add-citation-submit-btn');
 
+    if (isInitialState || selectedType === 'None') 
+    {
+        // Sembunyikan semua form groups
+        formGroups.forEach(group => 
+        {
+            group.classList.add('hidden');
+            const input = group.querySelector('input, select');
+            if (input) 
+            {
+                input.disabled = true;
+                input.classList.remove('input-error');
+            }
+        });
+
+        // Ubah tombol ke "Batal" dan sembunyikan tombol submit
+        if (cancelBtn) {cancelBtn.textContent = 'Batal';}
+        if (submitBtn) {submitBtn.style.display = 'none';}
+    }
+    else 
+    {
+        formGroups.forEach(group => 
+        {
+            const types = group.getAttribute('data-form-type').split(' ');
+            const input = group.querySelector('input, select');
+            
+            if (types.includes(selectedType)) 
+            {
+                // Tampilkan grup dan aktifkan input
+                group.classList.remove('hidden');
+                if (input) 
+                {
+                    input.disabled = false;
+                }
+            } 
+            else 
+            {
+                // Sembunyikan grup dan nonaktifkan input
+                group.classList.add('hidden');
+                if (input) 
+                {
+                    input.disabled = true;
+                    input.classList.remove('input-error');
+                }
+            }
+        });
+
+        // Ubah tombol ke "Kembali" dan tampilkan tombol submit
+        if (cancelBtn) {cancelBtn.textContent = 'Kembali';}
+        if (submitBtn) {submitBtn.style.display = 'block';}
+    }
+
+    /* 
     formGroups.forEach(group => 
     {
         const types = group.getAttribute('data-form-type').split(' ');
@@ -572,23 +627,24 @@ function updateFormVisibility(selectedType)
         
         if (types.includes(selectedType)) 
         {
-            // Tampilkan grup dan aktifkan input
+            -> Tampilkan grup dan aktifkan input
             group.classList.remove('hidden');
-            // if (input) {something}
+            -> if (input) {something}
             if (!input) {return;}
             input.disabled = false;
         } 
         else 
         {
-            // Sembunyikan grup dan nonaktifkan input
+            -> Sembunyikan grup dan nonaktifkan input
             group.classList.add('hidden');
-            // if (input){something}
+            -> if (input){something}
             if (!input) {return;}
             input.disabled = true;
-            // Hapus error jika ada saat disembunyikan
+            ->Hapus error jika ada saat disembunyikan
             input.classList.remove('input-error'); 
         }
-    });
+    }); 
+    */
 }
 
 /* 
@@ -602,6 +658,28 @@ document.querySelectorAll('.form-group[data-form-type*="Buku Jurnal"]').forEach(
     input.required = true;
 });
 */
+
+function handleCancelButton() 
+{
+    const typeSelect = document.getElementById('citation-type');
+    const dialog = document.getElementById('add-citation-dialog');
+    const cancelBtn = document.getElementById('add-citation-cancel-btn');
+
+    if (!typeSelect || !dialog || !cancelBtn) {return;}
+
+    // Cek apakah kita sedang dalam stage 2 (ada tipe yang dipilih selain 'None')
+    const currentType = typeSelect.value;
+    const isInStage2 = currentType !== 'None';
+
+    if (!isInStage2) 
+    {
+        dialog.close();
+        return;
+    } 
+
+    typeSelect.value = 'None';
+    updateFormVisibility('None', true);
+}
   
 /**
  * Menginisialisasi semua event listener untuk dialog.
@@ -629,13 +707,24 @@ function initializeModals()
     });
 
     // 2. Tutup modal saat tombol "Batal" diklik
-    cancelBtn.addEventListener('click', () => dialog.close());
+    cancelBtn.addEventListener('click', handleCancelButton);
 
     // 3. Ubah formulir saat dropdown diganti
-    typeSelect.addEventListener('change', (e) => updateFormVisibility(e.target.value));
+    typeSelect.addEventListener('change', (e) => 
+    {
+        const selectedValue = e.target.value;
+        // Jika memilih tipe valid, masuk ke stage 2 (isInitialState = false)
+        if (selectedValue === 'None') 
+        {
+            // Jika kembali ke 'None', tetap di stage 1
+            updateFormVisibility('None', true);
+            return;
+        }
+        updateFormVisibility(selectedValue, false);
+    });
 
     // 4. Tangani submit formulir
-    form.addEventListener('submit', handleModalFormSubmit);
+    form.addEventListener('submit', () => handleModalFormSubmit(event));
 }
 
 function deinitializeModals()
@@ -645,8 +734,8 @@ function deinitializeModals()
     form.reset();
 
     // Panggil lagi untuk mereset tampilan form ke default (None)
-    updateFormVisibility('None');
     document.getElementById('citation-type').value = "None";
+    updateFormVisibility('None');
 }
   
 /* ========================================================================
