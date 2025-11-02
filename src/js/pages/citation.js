@@ -1,3 +1,564 @@
+/* ========================================================================
+   BAGIAN 1: FUNGSI DIALOG KUSTOM
+   Bagian ini membuat dan mengelola dialog kustom untuk alert, confirm,
+   dan formulir tambah sitasi.
+======================================================================== */
+
+/**
+ * Menyuntikkan HTML untuk modal ke dalam dokumen.
+ * Dijalankan sekali saat DOM dimuat.
+ * CSS (dialog-styles.css) DIHARAPKAN SUDAH TERMASUK DALAM file citation.css
+ */
+function injectModalHTML() {
+    // 1. Buat HTML untuk semua dialog
+    const modalContainer = document.createElement('div');
+    modalContainer.innerHTML = `
+      <!-- Dialog untuk Alert Kustom -->
+      <dialog id="alert-dialog">
+        <h3 id="alert-title">Notifikasi</h3>
+        <p id="alert-message"></p>
+        <div class="dialog-actions">
+          <button id="alert-ok-btn" class="btn-primary">OK</button>
+        </div>
+      </dialog>
+  
+      <!-- Dialog untuk Konfirmasi Kustom -->
+      <dialog id="confirm-dialog">
+        <h3 id="confirm-title">Konfirmasi</h3>
+        <p id="confirm-message"></p>
+        <div class="dialog-actions">
+          <button id="confirm-cancel-btn" class="btn-secondary">Batal</button>
+          <button id="confirm-ok-btn" class="btn-danger">Ya, Hapus</button>
+        </div>
+      </dialog>
+  
+      <!-- Dialog untuk Tambah Sitasi Baru -->
+      <dialog id="add-citation-dialog">
+        <h3>Tambah Sitasi Baru</h3>
+        <form id="add-citation-form">
+          
+          <!-- Dropdown untuk memilih Tipe -->
+          <div class="form-group">
+            <label for="citation-type">Jenis Sitasi<span>*</span></label>
+            <select id="citation-type" name="citationType" required>
+              <option value="Buku">Buku</option>
+              <option value="Jurnal">Jurnal</option>
+              <option value="Web">Web</option>
+              <option value="Tesis">Tesis</option>
+              <option value="Makalah">Makalah</option>
+            </select>
+          </div>
+  
+          <!-- Semua field diratakan dan disembunyikan/ditampilkan oleh JS -->
+          <!-- Fields: Penulis, Tahun, Judul (Umum untuk semua) -->
+          <div class="form-group" data-form-type="Buku Jurnal Web Tesis Makalah">
+            <label for="form-penulis">Penulis<span>*</span></label>
+            <input type="text" id="form-penulis" name="Penulis" placeholder="Masukkan nama penulis" required />
+          </div>
+          
+          <div class="form-group" data-form-type="Buku Jurnal Web Tesis Makalah">
+            <label for="form-tahun">Tahun Publikasi<span>*</span></label>
+            <input type="text" id="form-tahun" name="Tahun" placeholder="YYYY" required />
+          </div>
+          
+          <div class="form-group" data-form-type="Buku Jurnal Web Tesis Makalah">
+            <label for="form-judul">Judul<span>*</span></label>
+            <input type="text" id="form-judul" name="Judul" placeholder="Masukkan judul" required />
+          </div>
+  
+          <!-- Fields: Penerbit (Buku, Tesis, Makalah) -->
+          <div class="form-group hidden" data-form-type="Buku Tesis Makalah">
+            <label for="form-penerbit">Penerbit<span>*</span></label>
+            <input type="text" id="form-penerbit" name="Penerbit" placeholder="Masukkan penerbit" />
+          </div>
+          
+          <!-- Fields: Informasi (Jurnal, Makalah) -->
+          <div class="form-group hidden" data-form-type="Jurnal Makalah">
+            <label for="form-informasi">Informasi Jurnal/Makalah<span>*</span></label>
+            <input type="text" id="form-informasi" name="Informasi" placeholder="Nama Jurnal, ISBN, dsb." />
+          </div>
+  
+          <!-- Fields: Nama Situs (Web) -->
+          <div class="form-group hidden" data-form-type="Web">
+            <label for="form-nama-web">Nama Situs<span>*</span></label>
+            <input type="text" id="form-nama-web" name="NamaSitus" placeholder="Nama situs web" />
+          </div>
+          
+          <!-- Tombol Aksi Formulir -->
+          <div class="dialog-actions">
+            <button type="button" id="add-citation-cancel-btn" class="btn-secondary">Batal</button>
+            <button type="submit" class="btn-primary">Kumpulkan</button>
+          </div>
+        </form>
+      </dialog>
+    `;
+    document.body.appendChild(modalContainer);
+  }
+  
+  /**
+   * Menampilkan dialog alert kustom.
+   * @param {string} message - Pesan yang akan ditampilkan.
+   */
+  function showCustomAlert(message) {
+    const dialog = document.getElementById('alert-dialog');
+    const messageEl = document.getElementById('alert-message');
+    const okBtn = document.getElementById('alert-ok-btn');
+  
+    messageEl.textContent = message;
+    dialog.showModal();
+  
+    // Hanya perlu satu event listener, hapus yang lama jika ada
+    okBtn.onclick = () => {
+      dialog.close();
+    };
+  }
+  
+  /**
+   * Menampilkan dialog konfirmasi kustom.
+   * @param {string} message - Pertanyaan konfirmasi.
+   * @returns {Promise<boolean>} - Resolve true jika OK, false jika Batal.
+   */
+  function showCustomConfirm(message) {
+    const dialog = document.getElementById('confirm-dialog');
+    const messageEl = document.getElementById('confirm-message');
+    const okBtn = document.getElementById('confirm-ok-btn');
+    const cancelBtn = document.getElementById('confirm-cancel-btn');
+  
+    messageEl.textContent = message;
+    dialog.showModal();
+  
+    return new Promise((resolve) => {
+      okBtn.onclick = () => {
+        dialog.close();
+        resolve(true);
+      };
+      cancelBtn.onclick = () => {
+        dialog.close();
+        resolve(false);
+      };
+    });
+  }
+  
+  /* ========================================================================
+     BAGIAN 2: LOGIKA INTI SITASI (dari citation.js)
+     Logika ini diambil dari file citation.js asli Anda,
+     tetapi dimodifikasi untuk menggunakan dialog kustom.
+  ======================================================================== */
+  
+  // --- Variabel Global (dari citation.js) ---
+  const urlParams = new URLSearchParams(window.location.search);
+  const selectedDocId = urlParams.get('docId');
+  
+  const allCitations = [];
+  // Asumsi GLOBAL_OBJECT ada di scope global dan dimuat oleh index.html
+  const docsData = GLOBAL_OBJECT.getCurrentUserDocuments();
+  let selectedDoc = null;
+  
+  docsData.forEach(doc => {
+      if (selectedDocId && doc.id != selectedDocId) {
+          return;
+      }
+      if (selectedDocId && doc.id == selectedDocId) {
+          selectedDoc = doc;
+      }
+      if (doc.citation && doc.citation.length > 0) {
+          doc.citation.forEach((citation, index) => {
+              allCitations.push({
+                  id: `${doc.id}-${index}`,
+                  docId: doc.id,
+                  docTitle: doc.title,
+                  ...citation
+              });
+          });
+      }
+  });
+  
+  // --- Fungsi Render (dari citation.js) ---
+  function renderCitationCards() {
+      const citationsList = document.getElementById('citationsList');
+      if (!citationsList) return;
+  
+      let cardsHTML = '';
+      
+      allCitations.forEach(citation => {
+          // Logika untuk menampilkan publisher (disesuaikan dari skrip lama)
+          let displayPublisher = citation.publisher;
+          if (!displayPublisher) {
+              if (citation.type === 'Jurnal') displayPublisher = citation.Informasi;
+              else if (citation.type === 'Web') displayPublisher = citation.NamaSitus;
+              else displayPublisher = 'N/A';
+          }
+  
+          cardsHTML += `
+              <div class="citation-card" data-citation-id="${citation.id}">
+                  <div class="citation-card-header">
+                      <div class="citation-card-content">
+                          <h3 class="citation-card-title">${citation.title}</h3>
+                          <p class="citation-card-authors">${citation.authors}</p>
+                          <div class="citation-card-meta">
+                              <span class="citation-card-meta-item">
+                                  <i class='bx bx-calendar'></i>
+                                  ${citation.publicationYear}
+                              </span>
+                              <span class="citation-card-meta-item">
+                                  <i class='bx bx-book'></i>
+                                  ${displayPublisher}
+                              </span>
+                          </div>
+                          <div class="citation-card-source">
+                              <i class='bx bx-file citation-card-source-icon'></i>
+                              <div class="citation-card-source-text">
+                                  Dari: <span class="citation-card-source-title">${citation.docTitle}</span>
+                              </div>
+                          </div>
+                      </div>
+                      <div class="citation-card-actions">
+                          <button class="citation-card-copy-btn" data-citation-id="${citation.id}" aria-label="Copy citation">
+                              <span>Salin</span>
+                          </button>
+                          <button class="citation-card-delete-btn" data-citation-id="${citation.id}" aria-label="Delete citation">
+                              <i class='bx bx-trash'></i>
+                          </button>
+                      </div>
+                  </div>
+              </div>
+          `;
+      });
+  
+      citationsList.innerHTML = cardsHTML;
+  
+      // Atur ulang event listener setelah render
+      document.querySelectorAll('.citation-card-copy-btn').forEach(btn => {
+          btn.addEventListener('click', function(e) {
+              const citationId = this.getAttribute('data-citation-id');
+              handleCitationCopy(citationId);
+          });
+      });
+  
+      document.querySelectorAll('.citation-card-delete-btn').forEach(btn => {
+          btn.addEventListener('click', function(e) {
+              const citationId = this.getAttribute('data-citation-id');
+              handleCitationDelete(citationId);
+          });
+      });
+  }
+  
+  /**
+   * MODIFIKASI: Menggunakan showCustomAlert()
+   */
+  function handleCitationCopy(citationId) {
+      const citation = allCitations.find(c => c.id === citationId);
+      if (citation) {
+          // Logika untuk menampilkan publisher (disesuaikan dari skrip lama)
+          let displayPublisher = citation.publisher;
+          if (!displayPublisher) {
+              if (citation.type === 'Jurnal') displayPublisher = citation.Informasi;
+              else if (citation.type === 'Web') displayPublisher = citation.NamaSitus;
+              else displayPublisher = 'N/A';
+          }
+          
+          const citationText = `${citation.authors} (${citation.publicationYear}). ${citation.title}. ${displayPublisher}.`;
+          
+          navigator.clipboard.writeText(citationText).then(() => {
+              showCustomAlert('Sitasi berhasil disalin ke clipboard!\n\n' + citationText);
+          }).catch(err => {
+              // Fallback
+              const textarea = document.createElement('textarea');
+              textarea.value = citationText;
+              document.body.appendChild(textarea);
+              textarea.select();
+              document.execCommand('copy');
+              document.body.removeChild(textarea);
+              showCustomAlert('Sitasi berhasil disalin ke clipboard!\n\n' + citationText);
+          });
+      }
+  }
+  
+  /**
+   * MODIFIKASI: Menjadi async dan menggunakan showCustomConfirm()
+   */
+  async function handleCitationDelete(citationId) {
+      const citation = allCitations.find(c => c.id === citationId);
+      if (citation) {
+          const confirmed = await showCustomConfirm(`Apakah Anda yakin ingin menghapus sitasi "${citation.title}"?\n\nTindakan ini tidak dapat dibatalkan.`);
+          
+          if (confirmed) {
+              const index = allCitations.findIndex(c => c.id === citationId);
+              if (index > -1) {
+                  allCitations.splice(index, 1);
+                  renderCitationCards();
+                  initializeSearch();
+              }
+          }
+      }
+  }
+  
+  // --- Fungsi Search & Update (dari citation.js) ---
+  function initializeSearch() {
+      const searchInput = document.getElementById('citationSearch');
+      if (searchInput) {
+          searchInput.addEventListener('input', function(e) {
+              const searchTerm = e.target.value.toLowerCase();
+              filterCitations(searchTerm);
+          });
+      }
+  }
+  
+  function filterCitations(searchTerm) {
+      const citationCards = document.querySelectorAll('.citation-card');
+      citationCards.forEach(card => {
+          const title = card.querySelector('.citation-card-title').textContent.toLowerCase();
+          const authors = card.querySelector('.citation-card-authors').textContent.toLowerCase();
+          const docTitle = card.querySelector('.citation-card-source-title').textContent.toLowerCase();
+          
+          if (title.includes(searchTerm) || authors.includes(searchTerm) || docTitle.includes(searchTerm)) {
+              card.style.display = 'block';
+          } else {
+              card.style.display = 'none';
+          }
+      });
+  }
+  
+  function updatePageTitle() {
+    // ... (Fungsi ini tidak diubah, salin dari citation.js asli)
+      const titleElement = document.querySelector('.citation-title');
+      const descElement = document.querySelector('.citation-description');
+      const sectionTitleElement = document.querySelector('.section-title');
+      const headerElement = document.querySelector('.citation-header');
+      
+      if (selectedDoc) {
+          if (titleElement) {
+              titleElement.textContent = `Citations - ${selectedDoc.title}`;
+          }
+          if (descElement) {
+              descElement.textContent = `Kelola sitasi untuk dokumen "${selectedDoc.title}"`;
+          }
+          if (sectionTitleElement) {
+              sectionTitleElement.textContent = `Sitasi Dokumen (${allCitations.length})`;
+          }
+          
+          if (headerElement && !headerElement.querySelector('.btn-back-dashboard')) {
+              const backBtn = document.createElement('button');
+              backBtn.className = 'btn-back-dashboard';
+              backBtn.innerHTML = `
+                  <i class='bx bx-arrow-left'></i>
+                  <span>Kembali</span>
+              `;
+              backBtn.onclick = () => {
+                  // Path ini diasumsikan benar berdasarkan struktur file Anda
+                  window.location.href = '../dashboard/index.html'; 
+              };
+              
+              const newCitationBtn = headerElement.querySelector('.btn-new-citation');
+              if (newCitationBtn) {
+                  headerElement.insertBefore(backBtn, newCitationBtn);
+              }
+          }
+      } else {
+          if (sectionTitleElement) {
+              sectionTitleElement.textContent = `Semua Sitasi (${allCitations.length})`;
+          }
+      }
+  }
+  
+  
+  /* ========================================================================
+     BAGIAN 3: LOGIKA MODAL BARU (Pengganti handleNewCitation)
+     Logika ini mengelola pembukaan, penggantian formulir (dropdown),
+     dan submit dialog tambah sitasi.
+  ======================================================================== */
+
+ /**
+  * Menangani UUID.
+  * Membuat dan memverifikasi UUID.
+  */
+ function generateUUID() 
+    {
+      // standar API browser modern untuk ID unik
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, 
+      function(c) 
+      {
+          const r = Math.random() * 16 | 0;
+          const v = c === 'x' ? r : (r & 0x3 | 0x8);
+          return v.toString(16);
+      });
+    }
+
+    //Menggunakan Array.prototype.some() untuk memeriksa keberadaan ID
+    function isUUIDUnique(uuid) {return !citations.some(citation => citation.id === uuid);}
+  
+  /**
+   * Menangani submit formulir modal.
+   * Mengambil data, memvalidasi, dan memetakan ke format sitasi sederhana.
+   */
+  function handleModalFormSubmit(event) {
+    event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+    
+    const citationType = data.citationType;
+    let publisher;
+    let rawData = { ...data }; // Salin semua data formulir
+  
+    // Memetakan 'publisher' berdasarkan jenis sitasi
+    // Ini adalah kompromi agar sesuai dengan model data sederhana Anda
+    switch (citationType) {
+      case 'Buku':
+      case 'Tesis':
+      case 'Makalah':
+        publisher = data.Penerbit;
+        break;
+      case 'Jurnal':
+        publisher = data.Informasi; // Menggunakan nama jurnal sebagai 'publisher'
+        break;
+      case 'Web':
+        publisher = data.NamaSitus; // Menggunakan nama situs sebagai 'publisher'
+        break;
+      default:
+        publisher = 'N/A';
+    }
+  
+    // Validasi sederhana
+    const title = data.Judul;
+    const authors = data.Penulis;
+    const year = data.Tahun;
+  
+    let isValid = true;
+    form.querySelectorAll('input[required], select[required]').forEach(input => {
+        if (!input.value) {
+            input.classList.add('input-error');
+            isValid = false;
+        } else {
+            input.classList.remove('input-error');
+        }
+    });
+  
+    if (!isValid) {
+      showCustomAlert('Harap isi semua bidang yang wajib (*).');
+      return;
+    }
+
+    // Pengecekan UUID dengan jenis loop 'repeat-until'
+    let newUuid;
+    do {newUuid = generateUUID();} while (!isUUIDUnique(newUuid)); // Ulangi selama ID yang dihasilkan tidak unik
+  
+    // Buat objek sitasi baru (sesuai format citation.js)
+    const newCitation = {
+        id: `new-${newUuid}`, //Untuk mengganti Date.now()
+        docId: selectedDocId || 0, // Gunakan docId yang dipilih atau 0
+        docTitle: selectedDoc ? selectedDoc.title : 'Manual Entry',
+        title: title.trim(),
+        authors: authors.trim(),
+        publicationYear: parseInt(year),
+        publisher: publisher ? publisher.trim() : 'N/A',
+        type: citationType, // Simpan tipe untuk referensi
+        ...rawData // Simpan semua data mentah jika diperlukan nanti
+    };
+  
+    // Tambahkan ke daftar, render ulang, dan tutup modal
+    allCitations.unshift(newCitation);
+    renderCitationCards();
+    initializeSearch(); // Perbarui jumlah di judul jika perlu
+    updatePageTitle(); 
+    
+    document.getElementById('add-citation-dialog').close();
+    form.reset();
+    // Panggil lagi untuk mereset tampilan form ke default (Buku)
+    updateFormVisibility('Buku'); 
+  }
+  
+  /**
+   * Memperbarui field formulir yang terlihat berdasarkan dropdown.
+   * @param {string} selectedType - Nilai dari dropdown (Buku, Jurnal, dll.)
+   */
+  function updateFormVisibility(selectedType) {
+    const formGroups = document.querySelectorAll('#add-citation-form .form-group[data-form-type]');
+    
+    formGroups.forEach(group => {
+      const types = group.getAttribute('data-form-type').split(' ');
+      const input = group.querySelector('input, select');
+      
+      if (types.includes(selectedType)) {
+        group.classList.remove('hidden');
+        // Set 'required' untuk input di dalamnya
+        if (input && input.id !== 'citation-type') { // Jangan ubah dropdown utama
+           input.required = true;
+        }
+      } else {
+        group.classList.add('hidden');
+        // Hapus 'required' agar tidak memblokir submit
+        if (input) {
+           input.required = false;
+           input.classList.remove('input-error'); // Hapus error jika ada
+        }
+      }
+    });
+  
+    // Pastikan field umum (Penulis, Tahun, Judul) selalu required
+    document.querySelectorAll('.form-group[data-form-type*="Buku Jurnal"]').forEach(g => {
+      const input = g.querySelector('input');
+      if (input) input.required = true;
+    });
+  }
+  
+  /**
+   * Menginisialisasi semua event listener untuk dialog.
+   * Menggantikan `initializeNewCitationButton`.
+   */
+  function initializeModals() {
+    const newCitationBtn = document.querySelector('.btn-new-citation');
+    const dialog = document.getElementById('add-citation-dialog');
+    const form = document.getElementById('add-citation-form');
+    const cancelBtn = document.getElementById('add-citation-cancel-btn');
+    const typeSelect = document.getElementById('citation-type');
+  
+    if (newCitationBtn && dialog && form && cancelBtn && typeSelect) {
+      // 1. Buka modal saat tombol "Tambah Sitasi" diklik
+      newCitationBtn.addEventListener('click', () => {
+        form.reset();
+        // Hapus semua error class sebelum dibuka
+        form.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
+        updateFormVisibility('Buku'); // Reset ke tampilan default
+        dialog.showModal();
+      });
+  
+      // 2. Tutup modal saat tombol "Batal" diklik
+      cancelBtn.addEventListener('click', () => {
+        dialog.close();
+      });
+  
+      // 3. Ubah formulir saat dropdown diganti
+      typeSelect.addEventListener('change', (e) => {
+        updateFormVisibility(e.target.value);
+      });
+  
+      // 4. Tangani submit formulir
+      form.addEventListener('submit', handleModalFormSubmit);
+    }
+  }
+  
+  /* ========================================================================
+     BAGIAN 4: INISIALISASI UTAMA
+  ======================================================================== */
+  
+  function initializeCitation() {
+      injectModalHTML(); // Suntikkan HTML modal terlebih dahulu
+      updatePageTitle();
+      renderCitationCards();
+      initializeSearch();
+      initializeModals(); // Inisialisasi listener untuk modal
+  }
+  
+  // Jalankan saat dokumen siap
+  if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeCitation);
+  } else {
+      initializeCitation();
+  }
+
+/*
+Original code:
 const urlParams = new URLSearchParams(window.location.search);
 const selectedDocId = urlParams.get('docId');
 
@@ -6,7 +567,7 @@ const docsData = GLOBAL_OBJECT.getCurrentUserDocuments();
 let selectedDoc = null;
 
 docsData.forEach(doc => {
-    // Jika ada docId di URL cuma ambil citations dari dokumen itu
+    -> Jika ada docId di URL cuma ambil citations dari dokumen itu
     if (selectedDocId && doc.id != selectedDocId) {
         return;
     }
@@ -216,7 +777,7 @@ function updatePageTitle() {
             sectionTitleElement.textContent = `Sitasi Dokumen (${allCitations.length})`;
         }
         
-        // add tombol back ke dashboard jika belum ada
+        -> add tombol back ke dashboard jika belum ada
         if (headerElement && !headerElement.querySelector('.btn-back-dashboard')) {
             const backBtn = document.createElement('button');
             backBtn.className = 'btn-back-dashboard';
@@ -228,7 +789,7 @@ function updatePageTitle() {
                 window.location.href = '../dashboard/index.html';
             };
             
-            // tambahkan html sebelum button "Tambah Sitasi"
+            -> tambahkan html sebelum button "Tambah Sitasi"
             const newCitationBtn = headerElement.querySelector('.btn-new-citation');
             if (newCitationBtn) {
                 headerElement.insertBefore(backBtn, newCitationBtn);
@@ -253,3 +814,4 @@ if (document.readyState === 'loading') {
 } else {
     initializeCitation();
 }
+*/
