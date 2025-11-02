@@ -109,6 +109,37 @@
     flex-direction: column;
 }
 
+.icon-selector {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: var(--spacing-2);
+}
+
+.icon-btn {
+    aspect-ratio: 1;
+    font-size: 2rem;
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    background-color: transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-btn:hover {
+    border-color: var(--primary);
+    background-color: var(--primary-subtle);
+    transform: scale(1.05);
+}
+
+.icon-btn.active {
+    border-color: var(--primary);
+    background-color: var(--primary-subtle);
+    box-shadow: 0 0 0 3px var(--primary-subtle);
+}
+
 .password-term-list {
     margin-top: var(--spacing-3);
 }

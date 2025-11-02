@@ -279,8 +279,12 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function renderWorkspaceStep() {
-        const iconOptions = workspaceIcons
-            .map((ic, idx) => `<option value="${ic}" ${idx === 0 ? 'selected' : ''}>${ic}</option>`)
+        const iconButtons = workspaceIcons
+            .map((ic, idx) => `
+                <button type="button" class="icon-btn ${idx === 0 ? 'active' : ''}" data-icon="${ic}">
+                    ${ic}
+                </button>
+            `)
             .join('');
 
         signUpWrapper.innerHTML = `
@@ -289,6 +293,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 <p id="sign-up-step">Step ${currentStep + 1} of ${signUpSteps.length} - ${signUpSteps[currentStep]}</p>
             </div>
             <form id="workspace-form" class="auth-form" autocomplete="off">
+                <div class="field">
+                    <label>Workspace Icon</label>
+                    <div class="icon-selector">
+                        ${iconButtons}
+                    </div>
+                    <input type="hidden" id="workspaceIcon" name="workspaceIcon" value="${workspaceIcons[0]}" />
+                </div>
+
                 <div class="field">
                     <label for="workspaceName">Workspace Name</label>
                     <input
@@ -312,8 +324,30 @@ document.addEventListener('DOMContentLoaded', function () {
                         class="input"
                     />
                 </div>
+
+                <div class="auth-form-action">
+                    <button type="button" class="btn btn-md btn-secondary" id="workspace-back">
+                        <i class="bx bx-arrow-back"></i>
+                        <span>Back</span>
+                    </button>
+                    <button type="submit" class="btn btn-md btn-primary" id="workspace-submit">
+                        <span>Finish</span>
+                        <i class="bx bx-check"></i>
+                    </button>
+                </div>
             </form>
         `;
+
+        const iconBtns = document.querySelectorAll('.icon-btn');
+        const hiddenInput = document.getElementById('workspaceIcon');
+        
+        iconBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                iconBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                hiddenInput.value = this.getAttribute('data-icon');
+            });
+        });
 
         document.getElementById('workspace-back').addEventListener('click', function (e) {
             e.preventDefault();
@@ -323,17 +357,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
         document.getElementById('workspace-form').addEventListener('submit', function (e) {
             e.preventDefault();
-            // signUpData.workspaceIcon = document.getElementById('workspaceIcon').value;
-            // signUpData.workspaceName = document.getElementById('workspaceName').value.trim();
-            // signUpData.workspaceDescription = document
-            //     .getElementById('workspaceDescription')
-            //     .value.trim();
-            // signUpData.workspaceIdToJoin = document
-            //     .getElementById('workspaceIdToJoin')
-            //     .value.trim();
+            signUpData.workspaceIcon = document.getElementById('workspaceIcon').value;
+            signUpData.workspaceName = document.getElementById('workspaceName').value.trim();
+            signUpData.workspaceDescription = document
+                .getElementById('workspaceDescription')
+                .value.trim();
 
-            // console.log('Final signUpData:', signUpData);
-            // alert('Sign up complete! (see console for data)');
+            console.log('Final signUpData:', signUpData);
+            alert('Pendaftaran selesai! Data telah disimpan (lihat console untuk detail)');
         });
     }
 
