@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - PaperNest</title>
+    <link rel="stylesheet" href="../src/css/pages/dashboard.css" />
+</head>
+
+<body>
+    <main>
+        <div class="dashboard-container">
+            <div class="dashboard-header">
+                <div>
+                    <h1 class="dashboard-title">Dashboard</h1>
+                    <p class="dashboard-description">Selamat datang kembali!</p>
+                </div>
+                <button class="btn-new-project">
+                    <i class='bx bx-plus'></i>
+                    <span>Dokumen Baru</span>
+                </button>
+            </div>
+            <div class="dashboard-search-section">
+                <div class="search-bar-wrapper">
+                    <i class='bx bx-search search-icon'></i>
+                    <input type="text" class="dashboard-search-input"
+                        placeholder="Cari dokumen..." id="dashboardSearch" />
+                </div>
+            </div>
+            <div class="projects-section">
+                <h2 class="section-title">Dokumen Terbaru</h2>
+                <div class="projects-grid" id="projectsGrid">
+                </div>
+            </div>
+        </div>
+    </main>
+    <script src="../src/js/global-object.js"></script>
+    <script src="../src/js/components/navbar.js"></script>
+    <script src="../src/js/pages/dashboard.js"></script>
+    <script>
+        createNavbar({
+            activePage: 'Projects',
+            insertPosition: 'afterbegin'
+        });
+    </script>
+</body>
+
+</html>
