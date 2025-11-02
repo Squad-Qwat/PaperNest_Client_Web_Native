@@ -150,6 +150,21 @@
     gap: var(--spacing-1-5);
     font-size: var(--text-sm);
     color: var(--muted-fg);
+    transition: color 0.3s ease;
+}
+
+.password-term-list li i {
+    font-size: 1.25rem;
+    color: var(--muted-fg);
+    transition: color 0.3s ease;
+}
+
+.password-term-list li.valid {
+    color: var(--success);
+}
+
+.password-term-list li.valid i {
+    color: var(--success);
 }
 
 .auth-footer {

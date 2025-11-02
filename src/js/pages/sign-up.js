@@ -97,7 +97,24 @@ document.addEventListener('DOMContentLoaded', function () {
             e.preventDefault();
             const emailValue = document.getElementById('email').value.trim();
             
-            // Simpan email ke signUpData
+            if (!emailValue) {
+                alert('Email harus diisi!');
+                return;
+            }
+            
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(emailValue)) {
+                alert('Format email tidak valid!\n\nContoh: user@example.com');
+                return;
+            }
+            
+            const usersData = GLOBAL_OBJECT.globalUsersData;
+            const emailExists = usersData.find(u => u.email === emailValue);
+            if (emailExists) {
+                alert('Email sudah terdaftar!\n\nSilakan gunakan email lain atau login.');
+                return;
+            }
+            
             signUpData.email = emailValue;
             
             currentStep = 1;
@@ -164,10 +181,38 @@ document.addEventListener('DOMContentLoaded', function () {
             renderStep();
         });
 
+        // password minimal 8 karakter
+        const passwordInput = document.getElementById('password');
+        const passwordTermList = document.getElementById('password-term-list');
+        
+        passwordInput.addEventListener('input', function() {
+            const pwd = this.value;
+            const termItem = passwordTermList.querySelector('li');
+            
+            if (pwd.length >= 8) {
+                termItem.classList.add('valid');
+            } else {
+                termItem.classList.remove('valid');
+            }
+        });
+
         document.getElementById('password-form').addEventListener('submit', function (e) {
             e.preventDefault();
             const pwd = document.getElementById('password').value;
             const confirm = document.getElementById('confirmPassword').value;
+            
+            // Validasi password minimal 8 karakter
+            if (pwd.length < 8) {
+                alert('Password harus minimal 8 karakter!');
+                return;
+            }
+            
+            // Validasi password dan confirm password harus sama
+            if (pwd !== confirm) {
+                alert('Password dan Confirm Password tidak sama!\n\nSilakan periksa kembali.');
+                document.getElementById('confirmPassword').value = '';
+                return;
+            }
             
             // Simpan password ke signUpData
             signUpData.password = pwd;
@@ -256,6 +301,40 @@ document.addEventListener('DOMContentLoaded', function () {
             const lastName = document.getElementById('lastName').value.trim();
             const usernameValue = document.getElementById('username').value.trim();
             const roleValue = document.getElementById('role').value;
+
+            if (!firstName) {
+                alert('First name harus diisi!');
+                return;
+            }
+            
+            if (!lastName) {
+                alert('Last name harus diisi!');
+                return;
+            }
+            
+            if (!usernameValue) {
+                alert('Username harus diisi!');
+                return;
+            }
+            
+            if (usernameValue.length < 3) {
+                alert('Username harus minimal 3 karakter!');
+                return;
+            }
+            
+            const usernameRegex = /^[a-zA-Z0-9_]+$/;
+            if (!usernameRegex.test(usernameValue)) {
+                alert('Username hanya boleh mengandung huruf, angka, dan underscore (_)!');
+                return;
+            }
+            
+            // Cek apakah username sudah digunakan
+            const usersData = GLOBAL_OBJECT.globalUsersData;
+            const usernameExists = usersData.find(u => u.username === usernameValue);
+            if (usernameExists) {
+                alert('Username sudah digunakan!\n\nSilakan pilih username lain.');
+                return;
+            }
 
             // Simpan credentials ke signUpData
             signUpData.firstName = firstName;
@@ -353,6 +432,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 .getElementById('workspaceDescription')
                 .value.trim();
 
+            // Validasi workspace name harus diisi
+            if (!signUpData.workspaceName) {
+                alert('Workspace name harus diisi!');
+                return;
+            }
+            
+            // Validasi workspace name minimal 3 karakter
+            if (signUpData.workspaceName.length < 3) {
+                alert('Workspace name harus minimal 3 karakter!');
+                return;
+            }
+
             // Simpan ke globalUsersData
             const usersData = GLOBAL_OBJECT.globalUsersData;
             const newId = usersData.length > 0 
@@ -379,7 +470,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
             usersData.push(newUser);
             
-            // Set sebagai current user
             GLOBAL_OBJECT.setCurrentUser(newId);
 
             console.log('Final signUpData:', signUpData);
@@ -388,7 +478,6 @@ document.addEventListener('DOMContentLoaded', function () {
             
             alert('Pendaftaran selesai! Data telah disimpan.\n\nUser ID: ' + newUser.id + '\nUsername: ' + newUser.username);
             
-            // Redirect ke dashboard setelah 1 detik
             setTimeout(() => {
                 window.location.href = './dashboard/index.html';
             }, 1000);
